@@ -56,7 +56,7 @@ function initializeServiceWorker() {
   // STEPS B6 ONWARDS WILL BE IN /sw.js
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker.register("/sw.js").then(
+      navigator.serviceWorker.register("./sw.js").then(
         (registration) => {
           console.log("Service worker registration succeeded:", registration);
         },
@@ -113,25 +113,23 @@ async function getRecipes() {
   //            resolve() method.
   // A10. TODO - Log any errors from catch using console.error
   // A11. TODO - Pass any errors to the Promise's reject() function
-  const recipes = localStorage.getItem("recipes");
-  if (recipes) {
-    return JSON.parse(recipes);
+  const storedRecipes = localStorage.getItem("recipes");
+  if (storedRecipes) {
+    return JSON.parse(storedRecipes);
   }
   const recipeArray = [];
   return new Promise(async (resolve, reject) => {
-    for (const url of RECIPE_URLS) {
-      try {
+    try {
+      for (const url of RECIPE_URLS) {
         const response = await fetch(url);
         const recipe = await response.json();
         recipeArray.push(recipe);
-        if (recipeArray.length === RECIPE_URLS.length) {
-          saveRecipesToStorage(recipeArray);
-        }
-        resolve(recipeArray);
-      } catch (error) {
-        console.log(error);
-        reject(error);
       }
+      saveRecipesToStorage(recipeArray);
+      resolve(recipeArray);
+    } catch (error) {
+      console.log(error);
+      reject(error);
     }
   });
 }
