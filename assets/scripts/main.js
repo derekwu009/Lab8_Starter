@@ -2,16 +2,16 @@
 
 // CONSTANTS
 const RECIPE_URLS = [
-    'https://adarsh249.github.io/Lab8-Starter/recipes/1_50-thanksgiving-side-dishes.json',
-    'https://adarsh249.github.io/Lab8-Starter/recipes/2_roasting-turkey-breast-with-stuffing.json',
-    'https://adarsh249.github.io/Lab8-Starter/recipes/3_moms-cornbread-stuffing.json',
-    'https://adarsh249.github.io/Lab8-Starter/recipes/4_50-indulgent-thanksgiving-side-dishes-for-any-holiday-gathering.json',
-    'https://adarsh249.github.io/Lab8-Starter/recipes/5_healthy-thanksgiving-recipe-crockpot-turkey-breast.json',
-    'https://adarsh249.github.io/Lab8-Starter/recipes/6_one-pot-thanksgiving-dinner.json',
+  "https://adarsh249.github.io/Lab8-Starter/recipes/1_50-thanksgiving-side-dishes.json",
+  "https://adarsh249.github.io/Lab8-Starter/recipes/2_roasting-turkey-breast-with-stuffing.json",
+  "https://adarsh249.github.io/Lab8-Starter/recipes/3_moms-cornbread-stuffing.json",
+  "https://adarsh249.github.io/Lab8-Starter/recipes/4_50-indulgent-thanksgiving-side-dishes-for-any-holiday-gathering.json",
+  "https://adarsh249.github.io/Lab8-Starter/recipes/5_healthy-thanksgiving-recipe-crockpot-turkey-breast.json",
+  "https://adarsh249.github.io/Lab8-Starter/recipes/6_one-pot-thanksgiving-dinner.json",
 ];
 
 // Run the init() function when the page has loaded
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener("DOMContentLoaded", init);
 
 // Starts the program, all function calls trace back here
 async function init() {
@@ -54,6 +54,20 @@ function initializeServiceWorker() {
   // B5. TODO - In the event that the service worker registration fails, console
   //            log that it has failed.
   // STEPS B6 ONWARDS WILL BE IN /sw.js
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js").then(
+        (registration) => {
+          console.log("Service worker registration succeeded:", registration);
+        },
+        (error) => {
+          console.error(`Service worker registration failed: ${error}`);
+        },
+      );
+    });
+  } else {
+    console.error("Service workers are not supported.");
+  }
 }
 
 /**
@@ -92,7 +106,6 @@ async function getRecipes() {
   //            function is using the async keyword so we recommend "await"
   // A7. TODO - For each fetch response, retrieve the JSON from it using .json().
   //            NOTE: .json() is ALSO asynchronous, so you will need to use
-  //            "await" again
   // A8. TODO - Add the new recipe to the recipes array
   // A9. TODO - Check to see if you have finished retrieving all of the recipes,
   //            if you have, then save the recipes to storage using the function
@@ -100,6 +113,27 @@ async function getRecipes() {
   //            resolve() method.
   // A10. TODO - Log any errors from catch using console.error
   // A11. TODO - Pass any errors to the Promise's reject() function
+  const recipes = localStorage.getItem("recipes");
+  if (recipes) {
+    return JSON.parse(recipes);
+  }
+  const recipeArray = [];
+  return new Promise(async (resolve, reject) => {
+    for (const url of RECIPE_URLS) {
+      try {
+        const response = await fetch(url);
+        const recipe = await response.json();
+        recipeArray.push(recipe);
+        if (recipeArray.length === RECIPE_URLS.length) {
+          saveRecipesToStorage(recipeArray);
+        }
+        resolve(recipeArray);
+      } catch (error) {
+        console.log(error);
+        reject(error);
+      }
+    }
+  });
 }
 
 /**
@@ -108,7 +142,7 @@ async function getRecipes() {
  * @param {Array<Object>} recipes An array of recipes
  */
 function saveRecipesToStorage(recipes) {
-  localStorage.setItem('recipes', JSON.stringify(recipes));
+  localStorage.setItem("recipes", JSON.stringify(recipes));
 }
 
 /**
@@ -120,9 +154,9 @@ function saveRecipesToStorage(recipes) {
  */
 function addRecipesToDocument(recipes) {
   if (!recipes) return;
-  let main = document.querySelector('main');
+  let main = document.querySelector("main");
   recipes.forEach((recipe) => {
-    let recipeCard = document.createElement('recipe-card');
+    let recipeCard = document.createElement("recipe-card");
     recipeCard.data = recipe;
     main.append(recipeCard);
   });
