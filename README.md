@@ -8,3 +8,5 @@ Derek Wu
    of graceful degradation.
    
 https://derekwu009.github.io/Lab8_Starter/
+
+![image](pwa.png)
